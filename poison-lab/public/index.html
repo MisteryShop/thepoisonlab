@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Poison Lab</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;600&family=Josefin+Sans:wght@100;300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #e8e0d0;
+      --accent: #c9a96e;
+    }
+
+    body.theme-vodka       { --bg: #0d0d0d; --text: #f0f0f0; --accent: #c0c8d0; --card-bg: #111318; --highlight: #e8eef5; }
+    body.theme-cachaca     { --bg: #0d1a0d; --text: #f5f0e8; --accent: #e8761a; --card-bg: #0f1f0f; --highlight: #f0a040; }
+    body.theme-champagne   { --bg: #080808; --text: #f5ead0; --accent: #c9a500; --card-bg: #0e0c08; --highlight: #f0d060; }
+    body.theme-rum         { --bg: #120a02; --text: #f5e8d0; --accent: #c87820; --card-bg: #1a0f05; --highlight: #e8a050; }
+    body.theme-gin         { --bg: #050f14; --text: #e8f5f0; --accent: #4ab8a0; --card-bg: #081820; --highlight: #60d8c0; }
+    body.theme-tequila     { --bg: #150d05; --text: #f5eed0; --accent: #d4a020; --card-bg: #1e1005; --highlight: #f0c840; }
+    body.theme-wine        { --bg: #100508; --text: #f5e8ed; --accent: #c03060; --card-bg: #180810; --highlight: #e06080; }
+    body.theme-whisky      { --bg: #0a0603; --text: #f0e8d8; --accent: #b87030; --card-bg: #140b05; --highlight: #d49050; }
+    body.theme-default     { --bg: #0a0a0a; --text: #e8e0d0; --accent: #c9a96e; --card-bg: #111111; --highlight: #d4b880; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 1.2s ease, color 0.8s ease;
+    }
+
+    /* ─── LEAVES ─── */
+    #leaves-container {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .leaf-svg {
+      position: absolute;
+      width: 100vw;
+    }
+
+    #leaf-top  { top: 0;    left: 0; transform-origin: center top; }
+    #leaf-bottom { bottom: 0; left: 0; transform-origin: center bottom; }
+
+    .leaf-svg.animate-open-top    { animation: openTop    1.8s cubic-bezier(0.7,0,0.3,1) forwards; }
+    .leaf-svg.animate-open-bottom { animation: openBottom 1.8s cubic-bezier(0.7,0,0.3,1) forwards; }
+
+    @keyframes openTop    { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-110%);opacity:.6} }
+    @keyframes openBottom { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(110%);opacity:.6} }
+
+    .leaf-hidden { display: none !important; }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      z-index: 5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 8vw, 6rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      line-height: 1;
+      text-shadow: 0 0 60px rgba(201,169,110,0.3);
+      margin-bottom: 0.3rem;
+    }
+
+    .brand-sub {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: clamp(0.65rem, 2vw, 0.85rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.45;
+      margin-bottom: 3.5rem;
+    }
+
+    .input-wrap { width: 100%; max-width: 620px; position: relative; }
+
+    .poison-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--accent);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 300;
+      padding: 0.9rem 0.5rem;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.03em;
+      transition: border-color 0.3s;
+    }
+    .poison-input::placeholder { color: var(--text); opacity: 0.35; font-style: italic; }
+    .poison-input:focus { border-bottom-color: var(--highlight, var(--accent)); }
+
+    .btn-generate {
+      margin-top: 2.2rem;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      padding: 0.85rem 2.8rem;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-generate::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: translateX(-102%);
+      transition: transform 0.35s ease;
+      z-index: -1;
+    }
+    .btn-generate:hover { color: var(--bg); }
+    .btn-generate:hover::before { transform: translateX(0); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .loading-dots { display: none; gap: 6px; justify-content: center; margin-top: 1.5rem; }
+    .loading-dots.visible { display: flex; }
+    .loading-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: dotPulse 1.2s infinite ease-in-out;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse { 0%,80%,100%{transform:scale(.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+
+    /* ─── RECIPE ─── */
+    #result-section {
+      position: relative;
+      z-index: 5;
+      display: none;
+      min-height: 100vh;
+      padding: 4rem 1rem 5rem;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    #result-section.visible { display: flex; }
+
+    .recipe-card {
+      background: var(--card-bg, #111);
+      border: 1px solid rgba(255,255,255,0.07);
+      max-width: 700px;
+      width: 100%;
+      padding: clamp(2rem, 5vw, 3.5rem);
+      position: relative;
+      animation: fadeUp 0.8s ease forwards;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    .recipe-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .drink-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+
+    .drink-description {
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 300;
+      color: var(--text);
+      opacity: 0.75;
+      font-style: italic;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+      border-left: 1px solid var(--accent);
+      padding-left: 1rem;
+    }
+
+    .meta-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
+    .meta-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .meta-label { font-family: 'Josefin Sans', sans-serif; font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.4; }
+    .meta-value { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--accent); }
+
+    .section-title {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+    }
+
+    .ingredients-list { list-style: none; padding: 0; margin: 0 0 0.5rem; }
+    .ingredients-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: clamp(0.95rem, 2vw, 1.05rem);
+      gap: 1rem;
+    }
+    .ingredient-name { opacity: 0.85; }
+    .ingredient-amount { font-family: 'Josefin Sans', sans-serif; font-size: 0.8rem; color: var(--accent); white-space: nowrap; letter-spacing: 0.05em; }
+
+    .steps-list { list-style: none; padding: 0; counter-reset: steps; }
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 1rem;
+      padding: 0.7rem 0;
+      font-size: clamp(0.95rem, 2vw, 1.05rem);
+      line-height: 1.65;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .steps-list li::before {
+      content: counter(steps, decimal-leading-zero);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.7rem;
+      color: var(--accent);
+      opacity: 0.6;
+      min-width: 1.8rem;
+      padding-top: 0.25rem;
+      letter-spacing: 0.05em;
+    }
+
+    .diff-badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border: 1px solid var(--accent);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-radius: 2px;
+    }
+
+    .btn-restart {
+      margin-top: 2.5rem;
+      display: inline-block;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text);
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      padding: 0.75rem 2rem;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+    .btn-restart:hover { opacity: 1; }
+
+    .error-msg { color: #e05050; font-size: 0.9rem; margin-top: 1rem; font-style: italic; display: none; }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body class="theme-default">
+
+  <!-- LEAVES -->
+  <div id="leaves-container">
+    <svg id="leaf-top" class="leaf-svg" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lgTop" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0d200d"/>
+          <stop offset="100%" stop-color="#1e3d1a"/>
+        </linearGradient>
+        <filter id="leafShadowTop">
+          <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#000" flood-opacity="0.7"/>
+        </filter>
+      </defs>
+      <path d="M-100,0 Q200,-60 720,500 Q1240,-60 1540,0 L1540,-200 L-100,-200 Z" fill="url(#lgTop)" filter="url(#leafShadowTop)"/>
+      <path d="M720,500 Q400,300 50,80"   stroke="#2d5a22" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M720,500 Q480,280 120,120"  stroke="#2d5a22" stroke-width="2"   fill="none" opacity="0.5"/>
+      <path d="M720,500 Q560,260 200,160"  stroke="#2d5a22" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <path d="M720,500 Q1040,300 1390,80" stroke="#2d5a22" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M720,500 Q1060,280 1320,120" stroke="#2d5a22" stroke-width="2"  fill="none" opacity="0.5"/>
+      <path d="M720,500 Q980,260 1240,160" stroke="#2d5a22" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <line x1="720" y1="500" x2="720" y2="0" stroke="#3d6b2e" stroke-width="3" opacity="0.5"/>
+    </svg>
+
+    <svg id="leaf-bottom" class="leaf-svg" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lgBot" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#0d200d"/>
+          <stop offset="100%" stop-color="#1e3d1a"/>
+        </linearGradient>
+        <filter id="leafShadowBot">
+          <feDropShadow dx="0" dy="-8" stdDeviation="18" flood-color="#000" flood-opacity="0.7"/>
+        </filter>
+      </defs>
+      <path d="M-100,500 Q200,560 720,0 Q1240,560 1540,500 L1540,700 L-100,700 Z" fill="url(#lgBot)" filter="url(#leafShadowBot)"/>
+      <path d="M720,0 Q400,200 50,420"    stroke="#2d5a22" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M720,0 Q480,220 120,380"   stroke="#2d5a22" stroke-width="2"   fill="none" opacity="0.5"/>
+      <path d="M720,0 Q560,240 200,340"   stroke="#2d5a22" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <path d="M720,0 Q1040,200 1390,420" stroke="#2d5a22" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M720,0 Q1060,220 1320,380" stroke="#2d5a22" stroke-width="2"   fill="none" opacity="0.5"/>
+      <path d="M720,0 Q980,240 1240,340"  stroke="#2d5a22" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <line x1="720" y1="0" x2="720" y2="500" stroke="#3d6b2e" stroke-width="3" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <!-- HERO -->
+  <section id="hero">
+    <h1 class="brand-name">The Poison Lab</h1>
+    <p class="brand-sub">Alchemy for the discerning drinker</p>
+    <div class="input-wrap">
+      <input id="ingredients-input" class="poison-input" type="text"
+        placeholder="What do you have at home?" autocomplete="off"/>
+    </div>
+    <button class="btn-generate" id="btn-generate" onclick="generatePoison()">
+      Generate Poison
+    </button>
+    <div class="loading-dots" id="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <p class="error-msg" id="error-msg">Something went wrong. Check your ingredients and try again.</p>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result-section">
+    <div class="recipe-card" id="recipe-card"></div>
+  </section>
+
+  <script>
+    function playLeafRustle() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const duration = 2.0;
+        const buffer = ctx.createBuffer(2, ctx.sampleRate * duration, ctx.sampleRate);
+        for (let ch = 0; ch < 2; ch++) {
+          const data = buffer.getChannelData(ch);
+          for (let i = 0; i < buffer.length; i++) {
+            const t = i / ctx.sampleRate;
+            const env = Math.sin(Math.PI * t / duration) * Math.exp(-t * 1.5) * (0.5 + 0.5 * Math.sin(t * 18));
+            data[i] = (Math.random() * 2 - 1) * env * 0.55;
+          }
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';  lp.frequency.value = 7000;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(1.2, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+        src.connect(hp); hp.connect(lp); lp.connect(gain); gain.connect(ctx.destination);
+        src.start();
+      } catch(e) {}
+    }
+
+    function detectTheme(text) {
+      const t = text.toLowerCase();
+      if (/vodka/.test(t)) return 'vodka';
+      if (/cacha[cç]a|pitu|51|velho barreiro/.test(t)) return 'cachaca';
+      if (/champagne|prosecco|sparkling|espumante/.test(t)) return 'champagne';
+      if (/rum|ron|bacardi|havana/.test(t)) return 'rum';
+      if (/gin|juniper/.test(t)) return 'gin';
+      if (/tequila|mezcal/.test(t)) return 'tequila';
+      if (/wine|vinho|vino|merlot|cabernet|ros[eé]/.test(t)) return 'wine';
+      if (/whisky|whiskey|bourbon|scotch|jameson/.test(t)) return 'whisky';
+      return 'default';
+    }
+
+    function openLeaves() {
+      return new Promise(resolve => {
+        document.getElementById('leaf-top').classList.add('animate-open-top');
+        document.getElementById('leaf-bottom').classList.add('animate-open-bottom');
+        setTimeout(() => {
+          document.getElementById('leaf-top').classList.add('leaf-hidden');
+          document.getElementById('leaf-bottom').classList.add('leaf-hidden');
+          resolve();
+        }, 1850);
+      });
+    }
+
+    function resetLeaves() {
+      ['leaf-top','leaf-bottom'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('animate-open-top','animate-open-bottom','leaf-hidden');
+      });
+    }
+
+    function buildRecipeHTML(data) {
+      const diffColors = { Easy: '#4ab87a', Medium: '#c9a500', Hard: '#e05050' };
+      const dc = diffColors[data.difficulty] || 'var(--accent)';
+      return `
+        <p class="section-title" style="margin-top:0;margin-bottom:.5rem">The Poison Lab presents</p>
+        <h2 class="drink-name">${data.name}</h2>
+        <p class="drink-description">${data.description}</p>
+        <div class="meta-row">
+          <div class="meta-item"><span class="meta-label">Prep Time</span><span class="meta-value">${data.prepTime}</span></div>
+          <div class="meta-item"><span class="meta-label">Difficulty</span><span class="diff-badge" style="border-color:${dc};color:${dc}">${data.difficulty}</span></div>
+          <div class="meta-item"><span class="meta-label">Serves</span><span class="meta-value">${data.serves}</span></div>
+        </div>
+        <p class="section-title">Ingredients</p>
+        <ul class="ingredients-list">${data.ingredients.map(i=>`<li><span class="ingredient-name">${i.name}</span><span class="ingredient-amount">${i.amount}</span></li>`).join('')}</ul>
+        <p class="section-title">Method</p>
+        <ol class="steps-list">${data.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        <button class="btn-restart" onclick="restartLab()">← New Poison</button>
+      `;
+    }
+
+    async function generatePoison() {
+      const input = document.getElementById('ingredients-input').value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById('btn-generate');
+      const dots = document.getElementById('loading-dots');
+      const errMsg = document.getElementById('error-msg');
+
+      btn.disabled = true;
+      errMsg.classList.remove('visible');
+      dots.classList.add('visible');
+      document.body.className = `theme-${detectTheme(input)}`;
+
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: input })
+        });
+
+        if (!response.ok) throw new Error('API error');
+        const recipe = await response.json();
+
+        playLeafRustle();
+        await openLeaves();
+
+        dots.classList.remove('visible');
+        document.getElementById('hero').style.display = 'none';
+        document.getElementById('recipe-card').innerHTML = buildRecipeHTML(recipe);
+        document.getElementById('result-section').classList.add('visible');
+
+      } catch(e) {
+        dots.classList.remove('visible');
+        btn.disabled = false;
+        errMsg.classList.add('visible');
+        document.body.className = 'theme-default';
+      }
+    }
+
+    function restartLab() {
+      document.getElementById('result-section').classList.remove('visible');
+      document.getElementById('hero').style.display = '';
+      document.getElementById('ingredients-input').value = '';
+      document.getElementById('btn-generate').disabled = false;
+      document.body.className = 'theme-default';
+      resetLeaves();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('ingredients-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') generatePoison();
+      });
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
